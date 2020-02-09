@@ -64,6 +64,14 @@ class Render {
     return item.isStarred ? yellow('★') : '';
   }
 
+  _getContext(item) {
+    if (item.context) {
+      return `+${item.context}`;
+    }
+
+    return '';
+  }
+
   _buildTitle(key, items) {
     const title = (key === new Date().toDateString()) ? `${underline(key)} ${grey('[Today]')}` : underline(key);
     const correlation = this._getCorrelation(items);
@@ -121,11 +129,22 @@ class Render {
     const {_isTask, isComplete, inProgress} = item;
     const age = this._getAge(item._timestamp);
     const star = this._getStar(item);
+    const context = this._getContext(item);
 
     let prefix = this._buildPrefix(item);
     let message = this._buildMessage(item);
+    if (context) {
+      message = message.replace(`+${context}`);
+    }
     let suffix = (age.length === 0) ? star : `${age} ${star}`;
 
+    if (context) {
+      let Reset = "\x1b[0m";
+      let BgRed = "\x1b[41m"
+      let FgYellow = "\x1b[33m"
+      let BgYellow = "\x1b[43m"
+      message = `${BgYellow}${context}${Reset} ${message} `
+    }
     let msgObj = {prefix, message, suffix};
 
     if (_isTask) {

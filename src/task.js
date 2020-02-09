@@ -7,6 +7,7 @@ class Task extends Item {
     this._isTask = true;
     this.isComplete = options.isComplete || false;
     this.inProgress = options.inProgress || false;
+    this.context = options.context || '';
     this.isStarred = options.isStarred || false;
     this.priority = options.priority || 1;
   }
