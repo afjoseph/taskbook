@@ -9,6 +9,7 @@ class Item {
     this._timestamp = now.getTime();
     this.description = options.description;
     this.comments = options.comments;
+    this.context = options.context;
     this.isStarred = options.isStarred || false;
     this.boards = options.boards || [];
   }

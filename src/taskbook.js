@@ -115,13 +115,23 @@ class Taskbook {
       }
     });
 
-    const description = desc.join(' ');
+    let context = '';
+    input.forEach(x => {
+      x.split(' ').forEach(y => {
+        if (y.startsWith('+') && y.length > 1) {
+          context = y.slice(1).trim();
+        }
+      });
+    });
+
+    let description = desc.join(' ');
+    description = description.replace(`+${context}`, '').trim();
 
     if (boards.length === 0) {
       boards.push('My Board');
     }
 
-    return {boards, description, id, priority};
+    return {boards, description, id, priority, context};
   }
 
   _getStats() {
@@ -254,7 +264,8 @@ class Taskbook {
   }
 
   _groupByBoard(data = this._data, boards = this._getBoards()) {
-    const grouped = {};
+    const data_grouped_by_board = {};
+    const sorted_data_grouped_by_board = {};
 
     if (boards.length === 0) {
       boards = this._getBoards();
@@ -263,17 +274,22 @@ class Taskbook {
     Object.keys(data).forEach(id => {
       boards.forEach(board => {
         if (data[id].boards.includes(board)) {
-          if (Array.isArray(grouped[board])) {
-            return grouped[board].push(data[id]);
+          if (Array.isArray(data_grouped_by_board[board])) {
+            const task = data[id];
+            // Sort by "inProgress" and "done"
+            if (task.inProgress)
+              return data_grouped_by_board[board].unshift(task);
+            else
+              return data_grouped_by_board[board].push(task);
           }
 
-          grouped[board] = [data[id]];
-          return grouped[board];
+          data_grouped_by_board[board] = [data[id]];
+          return data_grouped_by_board[board];
         }
       });
     });
 
-    return grouped;
+    return data_grouped_by_board;
   }
 
   _groupByDate(data = this._data, dates = this._getDates()) {
@@ -472,8 +488,8 @@ class Taskbook {
   }
 
   createTask(desc) {
-    const {boards, description, id, priority} = this._getOptions(desc);
-    const task = new Task({id, description, boards, priority});
+    const {boards, description, id, priority, context} = this._getOptions(desc);
+    const task = new Task({id, description, boards, priority, context});
     const {_data} = this;
     _data[id] = task;
     this._save(_data);
