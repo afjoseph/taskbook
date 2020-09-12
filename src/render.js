@@ -88,10 +88,17 @@ class Render {
     return prefix.join(' ');
   }
 
-  _buildCommentsMessage(item) {
-    const indent = [' '.repeat(8 - String(item._id).length)];
+  _buildCommentsMessage(item, showShortDescription=false) {
+    let commentMsg = null;
+    const commentThreshold = 100;
 
-    let comments = item.comments
+    if (showShortDescription && item.comments.length > 100) {
+      commentMsg = `${item.comments.substring(0, 97)}...`;
+    } else {
+      commentMsg = item.comments;
+    }
+    const indent = [' '.repeat(8 - String(item._id).length)];
+    let comments = commentMsg
           .split('\n')
           .map((line, index) => `${indent.join('')}${line}`)
           .join('\n')
@@ -125,7 +132,7 @@ class Render {
     return log(titleObj);
   }
 
-  _displayItemByBoard(item) {
+  _displayItemByBoard(item, showShortDescription=false) {
     const {_isTask, isComplete, inProgress} = item;
     const age = this._getAge(item._timestamp);
     const star = this._getStar(item);
@@ -154,7 +161,7 @@ class Render {
     }
 
     if (item.comments) {
-      message = this._buildCommentsMessage(item);
+      message = this._buildCommentsMessage(item, showShortDescription);
       msgObj = {prefix:"", message, suffix:""};
       log(msgObj);
     }
@@ -200,7 +207,7 @@ class Render {
           return;
         }
 
-        this._displayItemByBoard(item);
+        this._displayItemByBoard(item, true);
       });
     });
   }
